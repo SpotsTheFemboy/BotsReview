@@ -464,15 +464,19 @@ async def main_loop():
     
     bubble_sid = bubble_info["bubble"]["channelcode"]
     logger.info(f"Connecting to bubble with SID: {bubble_sid}")
-
+    tries = 0
     # Run the WebSocket logic with automatic reconnection
     while True:
-        try:
-            await bot.connect_and_listen(int(MAIN_BUBBLE_ID), bubble_sid)
-        except Exception as e:
-            logger.error(f"Connection error: {e}")
-            # Wait before reconnecting
-            await asyncio.sleep(5)
+        if tries < 3:
+            try:
+                await bot.connect_and_listen(int(MAIN_BUBBLE_ID), bubble_sid)
+            except Exception as e:
+                logger.error(f"Connection error: {e}")
+                tries += 1
+                # Wait before reconnecting
+                await asyncio.sleep(5)
+        else:
+            break
 
 if __name__ == "__main__":
     try:
